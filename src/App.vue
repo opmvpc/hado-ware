@@ -1,11 +1,19 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted } from "vue";
+import { GameMap } from "./type";
+import { Vector2 } from "./math";
 
 let canvas: HTMLCanvasElement;
 let ctx: CanvasRenderingContext2D;
 
 let requestId: number;
-let startTimeStamp: number;
+let previousTimeStamp: number;
+
+const map: GameMap = {
+  greenSquare: {
+    position: new Vector2(10, 10),
+  },
+};
 
 const doThings = () => {
   const leCanvas = document.querySelector("canvas");
@@ -24,13 +32,27 @@ const doThings = () => {
   }
 
   ctx = leCtx;
-
-  ctx.fillStyle = "green";
-  ctx.fillRect(10, 10, 150, 100);
 };
 
 const step = (timeStamp: number) => {
-  const delta = timeStamp - startTimeStamp / 1000;
+  if (previousTimeStamp === undefined) {
+    previousTimeStamp = timeStamp;
+  }
+  const delta = (timeStamp - previousTimeStamp) / 1000;
+  previousTimeStamp = timeStamp;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  map.greenSquare.position = map.greenSquare.position.add(
+    new Vector2(delta * 10, delta * 0)
+  );
+
+  ctx.fillStyle = "green";
+  ctx.fillRect(
+    map.greenSquare.position.x,
+    map.greenSquare.position.y,
+    150,
+    100
+  );
   window.requestAnimationFrame(step);
 };
 
@@ -41,12 +63,26 @@ const handleResize = () => {
   canvas.width = document.body.clientWidth;
 };
 
+const handleMoves = () => {
+  document.body.addEventListener("keydown", (event: KeyboardEvent) => {
+    enum KeyCode {
+      ArrowUp = "ArrowUp",
+      ArrowDown = "ArrowDown",
+      ArrowLeft = "ArrowLeft",
+      ArrowRight = "ArrowRight",
+    }
+    const eventCode: KeyCode = event.code as KeyCode;
+    if (eventCode === KeyCode.ArrowUp) {
+    }
+  });
+};
+
 onMounted(() => {
   doThings();
 
   window.addEventListener("resize", handleResize);
 
-  window.requestAnimationFrame(step);
+  requestId = window.requestAnimationFrame(step);
 });
 
 onUnmounted(() => {
