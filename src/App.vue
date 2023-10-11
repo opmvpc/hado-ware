@@ -5,8 +5,6 @@ import { Vector2 } from "./math";
 
 let canvas: HTMLCanvasElement;
 let ctx: CanvasRenderingContext2D;
-const screenHeight = document.body.clientHeight;
-const screenWidth = document.body.clientWidth;
 
 let requestId: number;
 let previousTimeStamp: number;
@@ -28,8 +26,8 @@ const doThings = () => {
 
   canvas = leCanvas;
 
-  canvas.height = screenHeight;
-  canvas.width = screenWidth;
+  canvas.height = document.body.clientHeight;
+  canvas.width = document.body.clientWidth;
 
   const leCtx = canvas.getContext("2d");
   if (leCtx === null) {
@@ -71,8 +69,8 @@ const step = (timeStamp: number) => {
   map.greenSquare.position = map.greenSquare.position.clamp(
     new Vector2(0, 0),
     new Vector2(
-      screenWidth - map.greenSquare.size.x,
-      screenHeight - map.greenSquare.size.y
+      canvas.width - map.greenSquare.size.x,
+      canvas.height - map.greenSquare.size.y
     )
   );
 
@@ -89,6 +87,7 @@ const step = (timeStamp: number) => {
 const handleResize = () => {
   if (canvas === null) {
   }
+
   canvas.height = document.body.clientHeight;
   canvas.width = document.body.clientWidth;
 };
