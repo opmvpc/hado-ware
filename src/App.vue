@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue";
 import { GameMap, KeyCode } from "./type";
-import { Vector2 } from "./math";
+import { Vector2 } from "./Math/Vector2";
+import { Camera } from "./Camera/Camera";
 
 let canvas: HTMLCanvasElement;
 let ctx: CanvasRenderingContext2D;
@@ -11,12 +12,13 @@ let previousTimeStamp: number;
 
 const map: GameMap = {
   greenSquare: {
-    position: new Vector2(10, 10),
-    size: new Vector2(150, 100),
+    position: new Vector2(0, 0),
+    size: new Vector2(4, 2),
   },
 };
 
 const pressedKeys: Map<KeyCode, KeyCode> = new Map();
+const leftClick: boolean = false;
 
 const doThings = () => {
   const leCanvas = document.querySelector("canvas");
@@ -35,9 +37,13 @@ const doThings = () => {
   }
 
   ctx = leCtx;
+
+  camera.resizeViewport(canvas.width, canvas.height);
 };
 
-const step = (timeStamp: number) => {
+const camera = new Camera();
+
+const update = (timeStamp: number) => {
   if (previousTimeStamp === undefined) {
     previousTimeStamp = timeStamp;
   }
@@ -45,14 +51,14 @@ const step = (timeStamp: number) => {
   previousTimeStamp = timeStamp;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   let direction: Vector2 = new Vector2(0, 0);
-  const speed: number = 500;
+  const speed: number = 50;
 
   if (pressedKeys.size > 0) {
     if (pressedKeys.has(KeyCode.ArrowUp)) {
-      direction.y -= 1;
+      direction.y += 1;
     }
     if (pressedKeys.has(KeyCode.ArrowDown)) {
-      direction.y += 1;
+      direction.y -= 1;
     }
     if (pressedKeys.has(KeyCode.ArrowLeft)) {
       direction.x -= 1;
@@ -66,22 +72,24 @@ const step = (timeStamp: number) => {
   movement = movement.mul(delta * speed);
 
   map.greenSquare.position = map.greenSquare.position.add(movement);
-  map.greenSquare.position = map.greenSquare.position.clamp(
-    new Vector2(0, 0),
-    new Vector2(
-      canvas.width - map.greenSquare.size.x,
-      canvas.height - map.greenSquare.size.y
-    )
-  );
 
   ctx.fillStyle = "green";
-  ctx.fillRect(
-    map.greenSquare.position.x,
-    map.greenSquare.position.y,
-    map.greenSquare.size.x,
-    map.greenSquare.size.y
+
+  const topLeftSquarePos = camera.worldToScreenSpace(map.greenSquare.position);
+
+  const botomRightSquarePos = camera.worldToScreenSpace(
+    map.greenSquare.position.add(map.greenSquare.size)
   );
-  window.requestAnimationFrame(step);
+
+  const screenSpaceSquareSize = botomRightSquarePos.sub(topLeftSquarePos);
+
+  ctx.fillRect(
+    topLeftSquarePos.x,
+    topLeftSquarePos.y,
+    screenSpaceSquareSize.x,
+    screenSpaceSquareSize.y
+  );
+  window.requestAnimationFrame(update);
 };
 
 const handleResize = () => {
@@ -90,6 +98,8 @@ const handleResize = () => {
 
   canvas.height = document.body.clientHeight;
   canvas.width = document.body.clientWidth;
+
+  camera.resizeViewport(canvas.width, canvas.height);
 };
 
 const handleKeyDown = (event: KeyboardEvent) => {
@@ -102,21 +112,27 @@ const handleKeyUp = (event: KeyboardEvent) => {
   pressedKeys.delete(code);
 };
 
+const handleClick = (event: MouseEvent) => {};
+
 onMounted(() => {
   doThings();
 
   window.addEventListener("resize", handleResize);
   document.body.addEventListener("keydown", handleKeyDown);
   document.body.addEventListener("keyup", handleKeyUp);
+  document.body.addEventListener("click", handleClick);
 
-  requestId = window.requestAnimationFrame(step);
+  requestId = window.requestAnimationFrame(update);
 });
 
 onUnmounted(() => {
   window.removeEventListener("resize", handleResize);
+  document.body.removeEventListener("keydown", handleKeyDown);
+  document.body.removeEventListener("keyup", handleKeyUp);
 });
 </script>
 
 <template>
   <canvas ref="canvas"></canvas>
 </template>
+./Vector2

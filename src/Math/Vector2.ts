@@ -11,6 +11,10 @@ export class Vector2 {
     return new Vector2(this.x + vector.x, this.y + vector.y);
   }
 
+  sub(vector: Vector2): Vector2 {
+    return new Vector2(this.x - vector.x, this.y - vector.y);
+  }
+
   mul(n: number): Vector2 {
     return new Vector2(this.x * n, this.y * n);
   }

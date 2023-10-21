@@ -1,4 +1,4 @@
-import { Vector2 } from "./math";
+import { Vector2 } from "./Math/Vector2";
 
 export enum KeyCode {
   ArrowUp = "ArrowUp",
