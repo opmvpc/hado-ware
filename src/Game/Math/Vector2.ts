@@ -23,8 +23,12 @@ export class Vector2 {
     if (this.x === 0 && this.y === 0) {
       return new Vector2(0, 0);
     }
-    const hypotenuse = Math.sqrt(this.x ** 2 + this.y ** 2);
+    const hypotenuse = this.magnitude();
     return new Vector2(this.x / hypotenuse, this.y / hypotenuse);
+  }
+
+  magnitude(): number {
+    return Math.sqrt(this.x ** 2 + this.y ** 2);
   }
 
   clamp(min: Vector2, max: Vector2): Vector2 {

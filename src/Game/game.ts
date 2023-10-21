@@ -66,7 +66,7 @@ export const draw = (timeStamp: number) => {
   previousTimeStamp = timeStamp;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   let direction: Vector2 = new Vector2(0, 0);
-  const speed: number = 50;
+  const speed: number = 100;
 
   if (pressedMouseButtons.has(MouseButtonCode.SecondaryButton)) {
     moveToPos = mousePos;
@@ -74,23 +74,13 @@ export const draw = (timeStamp: number) => {
   }
 
   if (moveToPos !== null) {
-    if (moveToPos.x > map.greenSquare.position.x) {
-      direction.x += moveToPos.x % 1;
-    } else if (moveToPos.x < map.greenSquare.position.x) {
-      direction.x -= moveToPos.x % 1;
-    }
-    if (moveToPos.y > map.greenSquare.position.y) {
-      direction.y += moveToPos.y % 1;
-    } else if (moveToPos.y < map.greenSquare.position.y) {
-      direction.y -= moveToPos.y % 1;
-    }
+    const vectorX = moveToPos.x - map.greenSquare.position.x;
+    const vectorY = moveToPos.y - map.greenSquare.position.y;
+    direction = new Vector2(vectorX, vectorY);
+  }
 
-    if (
-      moveToPos.x === map.greenSquare.position.x &&
-      moveToPos.y === map.greenSquare.position.y
-    ) {
-      moveToPos = null;
-    }
+  if (mousePos.x === direction.x && mousePos.y === direction.y) {
+    moveToPos = null;
   }
 
   if (pressedKeys.size > 0) {
@@ -108,8 +98,14 @@ export const draw = (timeStamp: number) => {
     }
   }
 
+  const magnitude = direction.magnitude();
+
   let movement = direction.normalizeMove();
   movement = movement.mul(delta * speed);
+
+  if (movement.magnitude() > magnitude) {
+    movement = direction;
+  }
 
   map.greenSquare.position = map.greenSquare.position.add(movement);
 
