@@ -1,8 +1,8 @@
 import { Vector2 } from "../Math/Vector2";
 
 export class Camera {
-  public h: number;
-  public aspectRatio: number;
+  public h: number = 0;
+  public aspectRatio: number = 0;
 
   constructor(
     public position: Vector2 = new Vector2(0, 0),

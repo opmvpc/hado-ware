@@ -1,6 +1,20 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue";
-import { GameMap, KeyCode } from "./type";
+import { GameMap } from "./types";
+import {
+  KeyCode,
+  handleKeyDown,
+  handleKeyUp,
+  pressedKeys,
+} from "./Keyboard/keyboard";
+import {
+  MouseButtonCode,
+  handleMouseDown,
+  handleMouseUp,
+  pressedMouseButtons,
+  previousFramePressedMouseButtons,
+  handleClick,
+} from "./Mouse/mouse";
 import { Vector2 } from "./Math/Vector2";
 import { Camera } from "./Camera/Camera";
 
@@ -10,6 +24,8 @@ let ctx: CanvasRenderingContext2D;
 let requestId: number;
 let previousTimeStamp: number;
 
+const camera = new Camera();
+
 const map: GameMap = {
   greenSquare: {
     position: new Vector2(0, 0),
@@ -17,10 +33,7 @@ const map: GameMap = {
   },
 };
 
-const pressedKeys: Map<KeyCode, KeyCode> = new Map();
-const leftClick: boolean = false;
-
-const doThings = () => {
+const setup = () => {
   const leCanvas = document.querySelector("canvas");
   if (leCanvas === null) {
     return;
@@ -40,8 +53,6 @@ const doThings = () => {
 
   camera.resizeViewport(canvas.width, canvas.height);
 };
-
-const camera = new Camera();
 
 const update = (timeStamp: number) => {
   if (previousTimeStamp === undefined) {
@@ -102,25 +113,16 @@ const handleResize = () => {
   camera.resizeViewport(canvas.width, canvas.height);
 };
 
-const handleKeyDown = (event: KeyboardEvent) => {
-  const code = event.code as KeyCode;
-  pressedKeys.set(code, code);
-};
-
-const handleKeyUp = (event: KeyboardEvent) => {
-  const code = event.code as KeyCode;
-  pressedKeys.delete(code);
-};
-
-const handleClick = (event: MouseEvent) => {};
-
 onMounted(() => {
-  doThings();
+  setup();
 
   window.addEventListener("resize", handleResize);
   document.body.addEventListener("keydown", handleKeyDown);
   document.body.addEventListener("keyup", handleKeyUp);
+  document.body.addEventListener("mouseup", handleMouseUp);
+  document.body.addEventListener("mousedown", handleMouseDown);
   document.body.addEventListener("click", handleClick);
+  window.oncontextmenu = () => false;
 
   requestId = window.requestAnimationFrame(update);
 });
@@ -129,10 +131,12 @@ onUnmounted(() => {
   window.removeEventListener("resize", handleResize);
   document.body.removeEventListener("keydown", handleKeyDown);
   document.body.removeEventListener("keyup", handleKeyUp);
+  document.body.removeEventListener("mouseup", handleMouseUp);
+  document.body.removeEventListener("mousedown", handleMouseDown);
+  document.body.removeEventListener("click", handleClick);
 });
 </script>
 
 <template>
   <canvas ref="canvas"></canvas>
 </template>
-./Vector2
