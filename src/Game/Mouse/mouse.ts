@@ -1,4 +1,5 @@
 import { Vector2 } from "../Math/Vector2";
+import { camera } from "../game";
 
 export enum MouseButtonCode {
   PrimaryButton = "PrimaryButton",
@@ -8,20 +9,38 @@ export enum MouseButtonCode {
   ForwardButton = "ForwardButton",
 }
 
-export const pressedMouseButtons: Map<MouseButtonCode, MouseButtonCode> =
-  new Map();
+type PressedMouseButtonsMap = Map<MouseButtonCode, MouseButtonCode>;
 
-export const previousFramePressedMouseButtons: Map<
-  MouseButtonCode,
-  MouseButtonCode
-> = new Map();
+export const pressedMouseButtons: PressedMouseButtonsMap = new Map();
+
+export const previousFramePressedMouseButtons: PressedMouseButtonsMap =
+  new Map();
 
 export let mousePos = new Vector2(0, 0);
 
-export const handleMouseDown = (event: MouseEvent) => {
-  mousePos = new Vector2(event.clientX, event.clientY);
-  console.log(mousePos);
+export const savePreviousFramePressedMouseButtons = () => {
+  previousFramePressedMouseButtons.clear();
+  pressedMouseButtons.forEach((value, key) => {
+    previousFramePressedMouseButtons.set(key, value);
+  });
+};
 
+export const pressedMouseButtonsDiff = (): PressedMouseButtonsMap => {
+  const diffMap = new Map();
+
+  const diffArray = [...pressedMouseButtons.keys()].filter((button) =>
+    previousFramePressedMouseButtons.has(button)
+  );
+
+  for (let index = 0; index < diffArray.length; index++) {
+    const element = diffArray[index];
+    diffMap.set(element, element);
+  }
+
+  return diffMap;
+};
+
+export const handleMouseDown = (event: MouseEvent) => {
   if (event.buttons & 0b00001) {
     pressedMouseButtons.set(
       MouseButtonCode.PrimaryButton,
@@ -56,9 +75,6 @@ export const handleMouseDown = (event: MouseEvent) => {
 };
 
 export const handleMouseUp = (event: MouseEvent) => {
-  mousePos = new Vector2(event.clientX, event.clientY);
-  console.log(mousePos);
-
   console.log(event.buttons);
   if ((event.buttons & 0b00001) === 0) {
     pressedMouseButtons.delete(MouseButtonCode.PrimaryButton);
@@ -76,6 +92,11 @@ export const handleMouseUp = (event: MouseEvent) => {
     pressedMouseButtons.delete(MouseButtonCode.ForwardButton);
   }
   console.log(pressedMouseButtons);
+};
+
+export const updateMousePos = (event: MouseEvent) => {
+  const screenMousePos = new Vector2(event.pageX, event.pageY);
+  mousePos = camera.screenToworldSpace(screenMousePos);
 };
 
 export const handleClick = (event: MouseEvent) => {};

@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue";
-import { setup, run, addEventListeners, removeEventListeners } from "./game";
+import {
+  setup,
+  run,
+  addEventListeners,
+  removeEventListeners,
+} from "./Game/game";
 
 onMounted(() => {
   setup();
@@ -14,5 +19,5 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <canvas ref="canvas"></canvas>
+  <canvas></canvas>
 </template>
